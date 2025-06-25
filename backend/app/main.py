@@ -1,10 +1,17 @@
-from fastapi import FastAPI
-from app.routes import endpoints
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+from git import Repo, GitCommandError
+from .schema.user_request import UserRequest
 
 app = FastAPI(
     title="Codebase Chatbot API",
-    description="Ask questions about code repos using RAG",
-    version="0.1.0"
+    description="Ask questions about code repos using RAG.",
+    version="1"
 )
 
-app.include_router(endpoints.router)
+@app.get("/")
+def home():
+    return JSONResponse(status_code=200,content="API For Chatting With Any Public Github Repo!")
+
+
+
