@@ -1,2 +1,5 @@
 backend/venv/
 *__pycache__/
+backend/workspace/*
+backend/app/chroma_db/*
+*.env
