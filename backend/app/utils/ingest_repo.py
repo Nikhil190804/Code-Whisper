@@ -1,12 +1,22 @@
-from langchain_community.embeddings import VoyageEmbeddings
 from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import (
+    UnstructuredMarkdownLoader,
+    TextLoader,
+    UnstructuredPDFLoader,
+    UnstructuredWordDocumentLoader,
+    UnstructuredRSTLoader,
+    NotebookLoader
+)
 from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
+from langchain_openai.embeddings import OpenAIEmbeddings
 from dotenv import load_dotenv
 from pathlib import Path
 
 
 load_dotenv()
-CODE_EMBEDDING_MODEL = VoyageEmbeddings(model="voyage-code-3")
+#CODE_EMBEDDING_MODEL = VoyageEmbeddings(model="voyage-code-3")
+CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-large")
+NON_CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-small")
 EXT_TO_LANGUAGE = {
     ".py": Language.PYTHON,
     ".js": Language.JS,
@@ -23,7 +33,24 @@ EXT_TO_LANGUAGE = {
     ".kt": Language.KOTLIN,
     ".scala": Language.SCALA,
     ".html": Language.HTML,
-    ".md":Language.MARKDOWN
+    ".htm":Language.HTML
+}
+
+EXT_TO_LOADER = {
+    ".md": UnstructuredMarkdownLoader,
+    ".txt": TextLoader,
+    ".log":TextLoader,
+    ".gitignore": TextLoader,
+    ".rst": UnstructuredRSTLoader,
+    ".pdf": UnstructuredPDFLoader,
+    ".docx": UnstructuredWordDocumentLoader,
+    ".ipynb": NotebookLoader,
+    ".yml": TextLoader,
+    ".yaml": TextLoader,
+    ".json": TextLoader,
+    ".toml": TextLoader,
+    ".xml": TextLoader,  
+    ".tex": TextLoader,
 }
 
 
@@ -34,6 +61,17 @@ def code_file_chunks(lang_enum,file_path):
         chunks = splitter.split_text(code)
 
     return chunks
+
+
+def non_code_file_chunks(DATA):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100
+    )
+    chunks = splitter.split_documents(DATA)
+
+    return chunks
+
 
 
 def save_code_embeddings(code_files_info):
@@ -49,27 +87,60 @@ def save_code_embeddings(code_files_info):
                 "chunk_id": i
             })
 
-    VECTOR_STORE = Chroma.from_texts(
+    CODE_VECTOR_STORE = Chroma.from_texts(
                     collection_name="repo_code_chunks",
                     texts=ALL_CHUNKS,
                     embedding=CODE_EMBEDDING_MODEL,
                     metadatas=METADATA,
-                    persist_directory="../chroma_db"
+                    persist_directory="../chroma_code_db"
                 )
     
-    query = "how is the app called here ?"
+    query = "what is the flask class here ?"
 
-    results = VECTOR_STORE.similarity_search(query, k=1)
+    results = CODE_VECTOR_STORE.similarity_search(query, k=3)
 
     for res in results:
         print("Content:", res.page_content)
         print("Metadata:", res.metadata)
         print("----------")
+        print("\n\n")
+
+
+
+def save_non_code_embeddings(non_code_files_info):
+    ALL_CHUNKS = []
+    METADATA = []
+
+    for f in non_code_files_info:
+        for i, chunk in enumerate(f["chunks"]):
+            ALL_CHUNKS.append(chunk.page_content)
+            METADATA.append({
+                "file_path": f["path"],
+                "language":f["language"],
+                "chunk_id": i
+            })
+    
+    NONCODE_VECTOR_STORE = Chroma.from_texts(
+        collection_name="repo_noncode_chunks",
+        texts=ALL_CHUNKS,
+        embedding=CODE_EMBEDDING_MODEL,
+        metadatas=METADATA,
+        persist_directory="../chroma_noncode_db"
+    )
+
+    query = "What are the table of contents here ?"
+    results = NONCODE_VECTOR_STORE.similarity_search(query, k=3)
+
+    for res in results:
+        print("Doc Chunk:", res.page_content)
+        print("Metadata:", res.metadata)
+        print("----------\n")
 
 
 def ingest_repo(repo_path):
     CODE_FILES_INFO = []
     FILES_SYMBOL_TABLE = []
+    NON_CODE_FILES_INFO = []
     repo_path = Path(repo_path)
 
     for filepath in repo_path.rglob("*"):
@@ -92,10 +163,23 @@ def ingest_repo(repo_path):
                     "language": lang_enum.name,
                     "chunks": chunks
                 })
+
+            if ext in EXT_TO_LOADER:
+                loader_cls = EXT_TO_LOADER[ext]
+                loader = loader_cls(filepath,encoding="utf-8")
+                docs = loader.load()
+                chunks = non_code_file_chunks(docs)
+                NON_CODE_FILES_INFO.append({
+                    "path": str(filepath),
+                    "language":ext,
+                    "chunks": chunks
+                })
+            
     #print(CODE_FILES_INFO)
 
     save_code_embeddings(CODE_FILES_INFO)
+    save_non_code_embeddings(NON_CODE_FILES_INFO)
 
 
 
-ingest_repo("C:\\Users\\DELL\\Desktop\\RepoChat\\backend\\workspace\\RepoChat")
+ingest_repo("C:\\Users\\DELL\\Desktop\\RepoChat\\backend\\workspace\\MyMusic")
