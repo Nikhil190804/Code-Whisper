@@ -15,7 +15,7 @@ from pathlib import Path
 
 load_dotenv()
 #CODE_EMBEDDING_MODEL = VoyageEmbeddings(model="voyage-code-3")
-CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-large")
+CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-small")
 NON_CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-small")
 EXT_TO_LANGUAGE = {
     ".py": Language.PYTHON,
@@ -94,16 +94,6 @@ def save_code_embeddings(code_files_info):
                     metadatas=METADATA,
                     persist_directory="../chroma_code_db"
                 )
-    
-    query = "what is the flask class here ?"
-
-    results = CODE_VECTOR_STORE.similarity_search(query, k=3)
-
-    for res in results:
-        print("Content:", res.page_content)
-        print("Metadata:", res.metadata)
-        print("----------")
-        print("\n\n")
 
 
 
@@ -127,14 +117,6 @@ def save_non_code_embeddings(non_code_files_info):
         metadatas=METADATA,
         persist_directory="../chroma_noncode_db"
     )
-
-    query = "What are the table of contents here ?"
-    results = NONCODE_VECTOR_STORE.similarity_search(query, k=3)
-
-    for res in results:
-        print("Doc Chunk:", res.page_content)
-        print("Metadata:", res.metadata)
-        print("----------\n")
 
 
 def ingest_repo(repo_path):
@@ -180,6 +162,3 @@ def ingest_repo(repo_path):
     save_code_embeddings(CODE_FILES_INFO)
     save_non_code_embeddings(NON_CODE_FILES_INFO)
 
-
-
-ingest_repo("C:\\Users\\DELL\\Desktop\\RepoChat\\backend\\workspace\\MyMusic")
