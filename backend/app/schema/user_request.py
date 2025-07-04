@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl, Field, field_validator
 
-class UserRequest(BaseModel):
+class UserStartRequest(BaseModel):
     repo_url: HttpUrl = Field(
         ...,
         description="Public HTTPS URL of the GitHub repository to be cloned.",
@@ -18,3 +18,8 @@ class UserRequest(BaseModel):
         if len(v.path.strip("/").split("/")) < 2:
             raise ValueError("Invalid GitHub repo URL format. Must be like 'https://github.com/user/repo'")
         return v
+    
+
+
+class UserChatRequest(BaseModel):
+    query : str
