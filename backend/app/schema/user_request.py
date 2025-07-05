@@ -22,4 +22,8 @@ class UserStartRequest(BaseModel):
 
 
 class UserChatRequest(BaseModel):
-    query : str
+    query : str = Field(
+        ...,
+        description="Your Question about the repo",
+        example="What is this repo about ?"
+    )
