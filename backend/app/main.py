@@ -4,9 +4,10 @@ from git import Repo, GitCommandError
 from .schema.user_request import UserStartRequest, UserChatRequest
 import os
 import shutil
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from .utils.ingest_repo import ingest_repo
 import stat
+from .utils.chat import SYSTEM_PROMPT,LLM_OUTPUT
 
 CHAT_HISTORY=[]
 app = FastAPI(
@@ -14,7 +15,6 @@ app = FastAPI(
     description="Ask questions about code repos using RAG & Advanced LLM Reasoning.",
     version="1"
 )
-
 
 def on_rm_error(func, path, exc_info):
     if not os.access(path, os.W_OK):
@@ -42,6 +42,8 @@ def home():
 @app.post("/init-chat")
 def init(request : UserStartRequest):
     CHAT_HISTORY.clear()
+    CHAT_HISTORY.append(SystemMessage(content=SYSTEM_PROMPT))
+
     repo_url = request.repo_url
     repo_name = str(repo_url).rstrip("/").split("/")[-1]
 
@@ -72,7 +74,9 @@ def init(request : UserStartRequest):
 @app.post("/start-chat")
 def start(request : UserChatRequest):
     query = request.query
-    CHAT_HISTORY.append(HumanMessage(content=query))
+    result = LLM_OUTPUT(query,CHAT_HISTORY)
+    print(result)
+   
     
 
 
