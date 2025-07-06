@@ -52,7 +52,18 @@ EXT_TO_LOADER = {
     ".xml": TextLoader,  
     ".tex": TextLoader,
 }
-
+NONCODE_VECTOR_STORE = Chroma(
+    collection_name="repo_noncode_chunks",
+    embedding_function=CODE_EMBEDDING_MODEL,
+    persist_directory="../chroma_noncode_db"
+)
+CODE_VECTOR_STORE = Chroma(
+    collection_name="repo_code_chunks",
+    embedding_function=CODE_EMBEDDING_MODEL,
+    persist_directory="../chroma_code_db"
+)
+CODE_VECTOR_STORE_RETRIEVER  = CODE_VECTOR_STORE.as_retriever()
+NONCODE_VECTOR_STORE_RETRIVER = NONCODE_VECTOR_STORE.as_retriever()
 
 def code_file_chunks(lang_enum,file_path):
     splitter = RecursiveCharacterTextSplitter.from_language(language=lang_enum)
