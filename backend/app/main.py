@@ -10,6 +10,7 @@ import stat
 from .utils.chat import SYSTEM_PROMPT,LLM_OUTPUT
 
 CHAT_HISTORY=[]
+FILE_SYMBOL_TABLE=[]
 app = FastAPI(
     title="Codebase Chatbot API",
     description="Ask questions about code repos using RAG & Advanced LLM Reasoning.",
@@ -42,6 +43,7 @@ def home():
 @app.post("/init-chat")
 def init(request : UserStartRequest):
     CHAT_HISTORY.clear()
+    FILE_SYMBOL_TABLE.clear()
     CHAT_HISTORY.append(SystemMessage(content=SYSTEM_PROMPT))
 
     repo_url = request.repo_url
@@ -54,7 +56,7 @@ def init(request : UserStartRequest):
 
     try:
         Repo.clone_from(repo_url, new_repo_path, depth=1)
-        ingest_repo(new_repo_path)
+        FILE_SYMBOL_TABLE=ingest_repo(new_repo_path)
         return {
             "message": "Repository cloned successfully",
             "local_path": new_repo_path
@@ -74,8 +76,14 @@ def init(request : UserStartRequest):
 @app.post("/start-chat")
 def start(request : UserChatRequest):
     query = request.query
-    result = LLM_OUTPUT(query,CHAT_HISTORY)
-    print(result)
+    try:
+        result = LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE)
+        print(result)
+        return {
+            "message": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
    
     
 

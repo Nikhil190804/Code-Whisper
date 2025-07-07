@@ -172,4 +172,5 @@ def ingest_repo(repo_path):
 
     save_code_embeddings(CODE_FILES_INFO)
     save_non_code_embeddings(NON_CODE_FILES_INFO)
+    return FILES_SYMBOL_TABLE
 

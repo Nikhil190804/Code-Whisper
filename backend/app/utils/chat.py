@@ -72,28 +72,39 @@ Question: Describe the contents of config.yaml
 Question: What does the UserManager class handle?  
 {{ "label": "FUNCTION&CLASS" }}
 ---
+Question: Thanks, that makes sense.  
+{{ "label": "FOLLOWUP" }}
+---
+Question: Yes, please explain more about that.  
+{{ "label": "FOLLOWUP" }}
+---
+Question: Could you summarize what you just said?  
+{{ "label": "FOLLOWUP" }}
+---
+Question: Okay, and what about authentication?  
+{{ "label": "FOLLOWUP" }}
+---
 Now classify the following question:
 Question: {query}
 """)
 
 
 relevant_multiple_files_prompt = PromptTemplate.from_template("""
-You are an expert software engineering assistant helping analyze a github code repository.
+You are an expert software engineering assistant helping analyze a GitHub code repository.
 A user has asked the following question:
 {user_question}
 
-Your job is to identify which specific files from the repository are relevant to answering this question.
-Below is the list of all available files in the repository, along with their paths and name.
-
+Your task is to decide which specific files from the repository are relevant to answering this question.
+Below is the list of all available files in the repository, along with their paths and names:
 {file_symbol_table}
 
-From this list, choose the files that are most relevant to answering the user's question.
-Return ONLY a JSON object in this exact format:
-{{ "files": ["<full_path_1>", "<full_path_2>", ...] }}
-
-- Include full file paths (from the list above), not just filenames.
-- Always return at least one file — even if your best guess is based on file names or language.
-- Do NOT include any explanation or extra text. Just the JSON object.
+Instructions:
+- If the user's question requires examining specific files to answer, return a list of the full paths of those relevant files (from the list above).
+- If the user's question does NOT require referring to any specific files (e.g. it's a follow-up question, a general conversational reply, or does not depend on repository contents), return -1.
+- Always use full file paths as shown above — not just filenames.
+- Return ONLY a JSON object in this exact format:
+{{ "files": ["<full_path_1>", "<full_path_2>", ...] }}    OR    {{ "files": ["-1"] }}
+- Do NOT include any explanation or extra text. Only the JSON object.
 """)
 relevant_multiple_files_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(MultipleFilesSelection)
 
@@ -127,15 +138,6 @@ USER QUESTION: {query}
 {context}
 
 """)
-
-
-
-
-
-
-
-
-
 
 
 
@@ -176,7 +178,9 @@ def comman_chain(inputs):
 comman_chain_runnable = RunnableLambda(comman_chain)
 
 
-
+def follow_up(inputs):
+    return "A follow-up question is asked, No context Needed."
+follow_up_runnable = RunnableLambda(follow_up)
     
 
 
@@ -195,11 +199,6 @@ file_table_str = format_file_symbol_table(FILES_SYMBOL_TABLE)
 
 classification_chain = classification_prompt | classification_model
 
-#res=chain.invoke({"user_question": "how to make changes to get_me"})
-#print(res.label.value)
-
-
-
 
 #chain = relevant_files_prompt | relevant_files_model
 #res = chain.invoke({
@@ -208,28 +207,20 @@ classification_chain = classification_prompt | classification_model
 #})
 #print(res.files)
 
-# wrap your conditions in RunnableLambda
-check_func_class = RunnableLambda(lambda inputs: inputs["category"] == "FUNCTION&CLASS")
-check_general = RunnableLambda(lambda inputs: inputs["category"] == "GENERAL")
+
 
 branched_chain = RunnableBranch(
-        (check_func_class, rag_runnable),
-        (check_general, classification_chain),
+        (lambda inputs: inputs["category"] == "FUNCTION&CLASS", rag_runnable),
+        (lambda inputs: inputs["category"] == "FOLLOWUP", follow_up_runnable),
         lambda x: "goodbye",
 )
 
-""" branched_chain = RunnableBranch(
-    branches=[(lambda inputs: inputs["category"]=="FUNCTION&CLASS",rag_runnable),
-    (lambda inputs: inputs["category"]=="GENERAL",classification_chain)]
-)
-branched_chain.default=rag_runnable """
 
-def LLM_OUTPUT(query,CHAT_HISTORY):
+def LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE):
     classification_result = classification_chain.invoke({"query":query}).label.value
     INPUTS = {"category":classification_result,"query":query,"CHAT_HISTORY":CHAT_HISTORY}
     context = branched_chain.invoke(INPUTS)
     INPUTS["context"]=context
     result = comman_chain_runnable.invoke(INPUTS)
-    print(result)
     CHAT_HISTORY.append(AIMessage(content=result))
 
