@@ -1,10 +1,10 @@
 from langchain_openai import ChatOpenAI
 from app.schema.model_outputs import ClassificationOutput, MultipleFilesSelection, SingleFileSelection
 from langchain_core.prompts import PromptTemplate
-from app.utils.ingest_repo import NONCODE_VECTOR_STORE_RETRIVER,CODE_VECTOR_STORE_RETRIEVER
+from app.utils.ingest_repo import NONCODE_VECTOR_STORE_RETRIVER,CODE_VECTOR_STORE_RETRIEVER,validate_and_read_file
 from langchain_core.runnables import RunnableLambda,RunnableBranch
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage
+
 
 CHAT_MODEL = ChatOpenAI(model="provider-3/gpt-4.1-nano")
 SYSTEM_PROMPT ="""
@@ -92,7 +92,7 @@ Question: {query}
 relevant_multiple_files_prompt = PromptTemplate.from_template("""
 You are an expert software engineering assistant helping analyze a GitHub code repository.
 A user has asked the following question:
-{user_question}
+{query}
 
 Your task is to decide which specific files from the repository are relevant to answering this question.
 Below is the list of all available files in the repository, along with their paths and names:
@@ -100,11 +100,11 @@ Below is the list of all available files in the repository, along with their pat
 
 Instructions:
 - If the user's question requires examining specific files to answer, return a list of the full paths of those relevant files (from the list above).
-- If the user's question does NOT require referring to any specific files (e.g. it's a follow-up question, a general conversational reply, or does not depend on repository contents), return -1.
+- If the user's question does NOT require referring to any specific files (e.g. it's a follow-up question, a general conversational reply, or does not depend on repository contents), return "-1".
 - Always use full file paths as shown above — not just filenames.
 - Return ONLY a JSON object in this exact format:
 {{ "files": ["<full_path_1>", "<full_path_2>", ...] }}    OR    {{ "files": ["-1"] }}
-- Do NOT include any explanation or extra text. Only the JSON object.
+- Do NOT include any explanation or extra text. Only the JSON object with double quoted strings.
 """)
 relevant_multiple_files_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(MultipleFilesSelection)
 
@@ -113,7 +113,7 @@ relevant_multiple_files_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with
 relevant_single_file_prompt = PromptTemplate.from_template("""
 You are an expert software engineering assistant helping analyze a github code repository.
 A user has asked the following question:
-{user_question}
+{query}
 
 Below is a list of all available files in the repository:
 {file_symbol_table}
@@ -183,42 +183,59 @@ def follow_up(inputs):
 follow_up_runnable = RunnableLambda(follow_up)
     
 
+def GENERAL(inputs):
+    general_chain = relevant_multiple_files_prompt | relevant_multiple_files_model 
+    relevant_files = general_chain.invoke(inputs).files
+    output = ""
+
+    if(relevant_files[0]=="-1"):
+        output = "No Context Needed."
+    else:
+        for i in range(len(relevant_files)):
+            content,filename = validate_and_read_file(relevant_files[i])
+            if(content==None):
+                continue
+            output+=f"""{i+1}.  Filename: {filename} \nContents:-\n{content}\n"""
+
+    return output
+
+general_runnable = RunnableLambda(GENERAL)
 
 
 
+def single_file(inputs):
+    single_file_chain = relevant_single_file_prompt | relevant_single_file_model
+    relevant_files = single_file_chain.invoke(inputs)
+    output = ""
 
-FILES_SYMBOL_TABLE = [
-    {"path": "C:/repo/src/utils.py", "language": ".py", "filename": "utils.py"},
-    {"path": "C:/repo/src/config.yaml", "language": ".yaml", "filename": "config.yaml"},
-    {"path": "C:/repo/README.md", "language": ".md", "filename": "README.md"},
-]
+    if(relevant_files == "-1"):
+        output = "No Context Needed."
+    else:
+        content,filename = validate_and_read_file(relevant_files)
+        if(content!=None):
+            output+=f"""1.  Filename: {filename} \nContents:-\n{content}\n"""
 
-file_table_str = format_file_symbol_table(FILES_SYMBOL_TABLE)
+    return output
+single_file_runnable = RunnableLambda(single_file)
+
 
 
 
 classification_chain = classification_prompt | classification_model
 
-
-#chain = relevant_files_prompt | relevant_files_model
-#res = chain.invoke({
-#   "user_question": "what is this repo about and how do configure it?",
-#    "file_symbol_table": file_table_str
-#})
-#print(res.files)
-
-
-
 branched_chain = RunnableBranch(
         (lambda inputs: inputs["category"] == "FUNCTION&CLASS", rag_runnable),
         (lambda inputs: inputs["category"] == "FOLLOWUP", follow_up_runnable),
-        lambda x: "goodbye",
+        (lambda inputs: inputs["category"] == "GENERAL", general_runnable),
+        (lambda inputs: inputs["category"] == "FILE", single_file_runnable),
+        lambda x: "No Context Needed",
 )
 
 
 def LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE):
     classification_result = classification_chain.invoke({"query":query}).label.value
-    INPUTS = {"category":classification_result,"query":query,"CHAT_HISTORY":CHAT_HISTORY}
+    file_table_str = format_file_symbol_table(FILE_SYMBOL_TABLE)
+    INPUTS = {"category":classification_result,"query":query,"CHAT_HISTORY":CHAT_HISTORY,"file_symbol_table":file_table_str}
     context = branched_chain.invoke(INPUTS)
     INPUTS["context"]=context
     result = comman_chain_runnable.invoke(INPUTS)

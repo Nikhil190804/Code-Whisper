@@ -43,6 +43,7 @@ def home():
 @app.post("/init-chat")
 def init(request : UserStartRequest):
     CHAT_HISTORY.clear()
+    global FILE_SYMBOL_TABLE
     FILE_SYMBOL_TABLE.clear()
     CHAT_HISTORY.append(SystemMessage(content=SYSTEM_PROMPT))
 

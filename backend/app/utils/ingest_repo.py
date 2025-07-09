@@ -7,11 +7,12 @@ from langchain_community.document_loaders import (
     UnstructuredRSTLoader,
     NotebookLoader
 )
+from langchain_core.documents import Document
 from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
 from langchain_openai.embeddings import OpenAIEmbeddings
 from dotenv import load_dotenv
 from pathlib import Path
-
+import os
 
 load_dotenv()
 #CODE_EMBEDDING_MODEL = VoyageEmbeddings(model="voyage-code-3")
@@ -82,6 +83,36 @@ def non_code_file_chunks(DATA):
     chunks = splitter.split_documents(DATA)
 
     return chunks
+
+
+
+def validate_and_read_file(path):
+    if os.path.isfile(path):
+        file_path = Path(path)
+        filename = file_path.name
+        ext = file_path.suffix.lower()
+        docs=None
+        if(ext in EXT_TO_LOADER):
+            loader_cls = EXT_TO_LOADER[ext]
+            loader = loader_cls(file_path,encoding="utf-8")
+            docs = loader.load()
+        else:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+            doc = Document(
+                page_content=text,
+                metadata={
+                    "source": str(file_path),
+                    "filename": filename,
+                    "extension": ext,
+                }
+            )
+            docs = [doc] 
+        final_text = "\n\n".join(doc.page_content for doc in docs)
+        return (final_text,filename)
+        
+    else:
+        return (None,None)
 
 
 
