@@ -4,7 +4,7 @@ from git import Repo, GitCommandError
 from .schema.user_request import UserStartRequest, UserChatRequest
 import os
 import shutil
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import SystemMessage
 from .utils.ingest_repo import ingest_repo
 import stat
 from .utils.chat import SYSTEM_PROMPT,LLM_OUTPUT

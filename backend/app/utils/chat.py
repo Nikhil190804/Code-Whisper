@@ -105,6 +105,12 @@ Instructions:
 - Return ONLY a JSON object in this exact format:
 {{ "files": ["<full_path_1>", "<full_path_2>", ...] }}    OR    {{ "files": ["-1"] }}
 - Do NOT include any explanation or extra text. Only the JSON object with double quoted strings.
+- Your JSON Object will be validated against this class, hence follow the data consistency and avoid using unnecessary escape characters. 
+Validator Class:-
+class MultipleFilesSelection(BaseModel):
+    files: List[str] = Field(
+        description="List of full file paths relevant to answering the user's question."
+    )
 """)
 relevant_multiple_files_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(MultipleFilesSelection)
 
@@ -172,8 +178,6 @@ def comman_chain(inputs):
     CHAT_HISTORY = inputs["CHAT_HISTORY"]
     CHAT_HISTORY.append(HumanMessage(content=prompt))
     result = CHAT_MODEL.invoke(CHAT_HISTORY).content
-
-    print(result)
     return result
 comman_chain_runnable = RunnableLambda(comman_chain)
 
@@ -240,4 +244,5 @@ def LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE):
     INPUTS["context"]=context
     result = comman_chain_runnable.invoke(INPUTS)
     CHAT_HISTORY.append(AIMessage(content=result))
+    return result
 

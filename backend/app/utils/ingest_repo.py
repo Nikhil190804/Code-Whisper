@@ -13,6 +13,8 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+from charset_normalizer import from_path
+
 
 load_dotenv()
 #CODE_EMBEDDING_MODEL = VoyageEmbeddings(model="voyage-code-3")
@@ -94,7 +96,9 @@ def validate_and_read_file(path):
         docs=None
         if(ext in EXT_TO_LOADER):
             loader_cls = EXT_TO_LOADER[ext]
-            loader = loader_cls(file_path,encoding="utf-8")
+            result = from_path(file_path)
+            encoding = result.best().encoding
+            loader = loader_cls(file_path,encoding=encoding)
             docs = loader.load()
         else:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -190,7 +194,9 @@ def ingest_repo(repo_path):
 
             if ext in EXT_TO_LOADER:
                 loader_cls = EXT_TO_LOADER[ext]
-                loader = loader_cls(filepath,encoding="utf-8")
+                result = from_path(filepath)
+                encoding = result.best().encoding
+                loader = loader_cls(filepath,encoding=encoding)
                 docs = loader.load()
                 chunks = non_code_file_chunks(docs)
                 NON_CODE_FILES_INFO.append({
