@@ -22,13 +22,12 @@ class ClassificationOutput(BaseModel):
 
 
 class MultipleFilesSelection(BaseModel):
-    files: List[str] = Field(
-        description="List of full file paths relevant to answering the user's question."
+    file_indices: List[int] = Field(
+        description="List of file indices (1-based) relevant to answering the user's question. Return [-1] if no files are relevant."
     )
 
 
-
 class SingleFileSelection(BaseModel):
-    file_path: str = Field(
-        description='Full path to the matched file in the repository. Return "-1" if no matching file is found.'
+    file_index: int = Field(
+        description='The 1-based index of the single matched file from the file list. Return -1 if no matching file is found.'
     )
