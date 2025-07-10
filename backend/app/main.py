@@ -7,10 +7,11 @@ import shutil
 from langchain_core.messages import SystemMessage
 from .utils.ingest_repo import ingest_repo
 import stat
-from .utils.chat import SYSTEM_PROMPT,LLM_OUTPUT
+from .utils.chat import SYSTEM_PROMPT,LLM_OUTPUT,format_file_symbol_table
 
 CHAT_HISTORY=[]
 FILE_SYMBOL_TABLE=[]
+file_table_str=""
 app = FastAPI(
     title="Codebase Chatbot API",
     description="Ask questions about code repos using RAG & Advanced LLM Reasoning.",
@@ -44,6 +45,7 @@ def home():
 def init(request : UserStartRequest):
     CHAT_HISTORY.clear()
     global FILE_SYMBOL_TABLE
+    global file_table_str
     FILE_SYMBOL_TABLE.clear()
     CHAT_HISTORY.append(SystemMessage(content=SYSTEM_PROMPT))
 
@@ -58,6 +60,8 @@ def init(request : UserStartRequest):
     try:
         Repo.clone_from(repo_url, new_repo_path, depth=1)
         FILE_SYMBOL_TABLE=ingest_repo(new_repo_path)
+        file_table_str = format_file_symbol_table(FILE_SYMBOL_TABLE)
+        print(file_table_str)
         return {
             "message": "Repository cloned successfully",
             "local_path": new_repo_path
@@ -78,7 +82,7 @@ def init(request : UserStartRequest):
 def start(request : UserChatRequest):
     query = request.query
     try:
-        result = LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE)
+        result = LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE,file_table_str)
         print(result)
         return {
             "message": result,
