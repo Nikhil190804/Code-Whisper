@@ -1,4 +1,4 @@
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_community.document_loaders import (
     UnstructuredMarkdownLoader,
     TextLoader,
@@ -36,7 +36,9 @@ EXT_TO_LANGUAGE = {
     ".kt": Language.KOTLIN,
     ".scala": Language.SCALA,
     ".html": Language.HTML,
-    ".htm":Language.HTML
+    ".htm":Language.HTML,
+    ".jsx":Language.JS,
+    ".tsx":Language.TS
 }
 
 EXT_TO_LOADER = {
@@ -172,6 +174,8 @@ def ingest_repo(repo_path):
     repo_path = Path(repo_path)
 
     for filepath in repo_path.rglob("*"):
+        if ".git" in filepath.parts:
+            continue
         if filepath.is_file():
             filename = filepath.name
             ext = filepath.suffix.lower()

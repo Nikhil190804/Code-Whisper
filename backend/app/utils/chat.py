@@ -31,58 +31,58 @@ Be precise, technical, and helpful in your answers.
 classification_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(ClassificationOutput)
 classification_prompt = PromptTemplate.from_template("""
 You are a classifier that analyzes software engineering user questions about a github code repository.
-Classify each question into exactly one of these categories: GENERAL, FILE, FUNCTION&CLASS.
+Classify each question into exactly one of these categories: GENERAL, FILE, FUNCTION&CLASS, FOLLOWUP.
 Return your response in the following JSON format:
-{{ "label": "GENERAL" }}
+{{ "label": "<CATEGORY_LABEL>" }}
 Here are some examples:
 ---
+Question: What arguments does the process_data method take?  
+{{ "label": "FUNCTION&CLASS" }}
+---
+Question: Yes, please explain more about that.  
+{{ "label": "FOLLOWUP" }}
+---
+Question: What does the UserManager class handle?  
+{{ "label": "FUNCTION&CLASS" }}
+---
+Question: Could you summarize what you just said?  
+{{ "label": "FOLLOWUP" }}
+---
 Question: How do I install the dependencies for this repo?  
-{{ "label": "GENERAL" }}
----
-Question: What does the file utils.py do?  
-{{ "label": "FILE" }}
----
-Question: What is the purpose of the class ConfigLoader?  
-{{ "label": "FUNCTION&CLASS" }}
----
-Question: How can I contribute to this repository?  
-{{ "label": "GENERAL" }}
----
-Question: Is there a license file in this repo?  
-{{ "label": "FILE" }}
----
-Question: Can you explain how the authenticate_user function works?  
-{{ "label": "FUNCTION&CLASS" }}
----
-Question: Who maintains this project?  
 {{ "label": "GENERAL" }}
 ---
 Question: What is inside the README.md file?  
 {{ "label": "FILE" }}
 ---
-Question: What arguments does the process_data method take?  
-{{ "label": "FUNCTION&CLASS" }}
+Question: Okay, and what about authentication?  
+{{ "label": "FOLLOWUP" }}
 ---
-Question: What are the main goals of this repository?  
+Question: How can I contribute to this repository?  
 {{ "label": "GENERAL" }}
 ---
 Question: Describe the contents of config.yaml  
 {{ "label": "FILE" }}
 ---
-Question: What does the UserManager class handle?  
+Question: What does the file utils.py do?  
+{{ "label": "FILE" }}
+---
+Question: Thanks, that makes sense. I got that.  
+{{ "label": "FOLLOWUP" }}
+---
+Question: What are the main goals of this repository?  
+{{ "label": "GENERAL" }}
+---
+Question: Who maintains this project?  
+{{ "label": "GENERAL" }}
+---
+Question: Can you explain how the authenticate_user function works?  
 {{ "label": "FUNCTION&CLASS" }}
 ---
-Question: Thanks, that makes sense.  
-{{ "label": "FOLLOWUP" }}
+Question: Is there a license file in this repo?  
+{{ "label": "FILE" }}
 ---
-Question: Yes, please explain more about that.  
-{{ "label": "FOLLOWUP" }}
----
-Question: Could you summarize what you just said?  
-{{ "label": "FOLLOWUP" }}
----
-Question: Okay, and what about authentication?  
-{{ "label": "FOLLOWUP" }}
+Question: What is the purpose of the class ConfigLoader?  
+{{ "label": "FUNCTION&CLASS" }}
 ---
 Now classify the following question:
 Question: {query}
@@ -95,42 +95,36 @@ A user has asked the following question:
 {query}
 
 Your task is to decide which specific files from the repository are relevant to answering this question.
-Below is the list of all available files in the repository, along with their paths and names:
+Below is the list of all available files in the repository, each assigned a unique index:
+
 {file_symbol_table}
 
 Instructions:
-- If the user's question requires examining specific files to answer, return a list of the full paths of those relevant files (from the list above).
-- If the user's question does NOT require referring to any specific files (e.g. it's a follow-up question, a general conversational reply, or does not depend on repository contents), return "-1".
-- Always use full file paths as shown above — not just filenames.
+- If the user's question requires examining specific files to answer, return a list of the indices of those relevant files, using the numbers shown before each file above.
+- If the user's question does NOT require referring to any specific files (e.g. it's a follow-up question, a general conversational reply, or does not depend on repository contents), return [-1].
 - Return ONLY a JSON object in this exact format:
-{{ "files": ["<full_path_1>", "<full_path_2>", ...] }}    OR    {{ "files": ["-1"] }}
-- Do NOT include any explanation or extra text. Only the JSON object with double quoted strings.
-- Your JSON Object will be validated against this class, hence follow the data consistency and avoid using unnecessary escape characters. 
-Validator Class:-
-class MultipleFilesSelection(BaseModel):
-    files: List[str] = Field(
-        description="List of full file paths relevant to answering the user's question."
-    )
+    {{ "file_indices": [1, 5, 8] }}    OR    {{ "file_indices": [-1] }}
+- Do NOT include any explanation or extra text. Only the JSON object with numeric values.
 """)
 relevant_multiple_files_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(MultipleFilesSelection)
 
 
 
 relevant_single_file_prompt = PromptTemplate.from_template("""
-You are an expert software engineering assistant helping analyze a github code repository.
+You are an expert software engineering assistant helping analyze a GitHub code repository.
 A user has asked the following question:
 {query}
 
-Below is a list of all available files in the repository:
+Below is a numbered list of all available files in the repository:
 {file_symbol_table}
 
 The user has explicitly mentioned a filename in their question.
 Your task is to:
-- Identify exactly which file they are referring to from the list.
-- If no such filename is present in the list, return: {{ "file_path": "-1" }}
-- Return ONLY a JSON object in this exact format: {{ "file_path": "<full_path>" }}
-- The full path must match only one of the paths listed above.
-- Do not include any explanation or extra text.
+- Identify exactly which single file they are referring to from the list above.
+- If the filename mentioned in the question does NOT match any file in the list, return -1.
+- Return ONLY a JSON object in this exact format:
+{{ "file_index": 3 }}     OR    {{ "file_index": -1 }}
+- Do NOT include any explanation or extra text. Only the JSON object with an integer value.
 """)
 relevant_single_file_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(SingleFileSelection)
 
@@ -149,8 +143,10 @@ USER QUESTION: {query}
 
 def format_file_symbol_table(symbol_table):
     output = ""
+    i=1
     for data in symbol_table:
-        output+=f"- Path: {data['path']}   Filename: {data['filename']}\n"   
+        output+=f"{i}.  Path: {data['path']}   Filename: {data['filename']}\n"  
+        i+=1 
     return output
 
 
@@ -189,17 +185,24 @@ follow_up_runnable = RunnableLambda(follow_up)
 
 def GENERAL(inputs):
     general_chain = relevant_multiple_files_prompt | relevant_multiple_files_model 
-    relevant_files = general_chain.invoke(inputs).files
+    relevant_files = general_chain.invoke(inputs).file_indices
     output = ""
+    FILES_SYMBOL_TABLE = inputs["FILES_DATA"]
+    cnt=1
+    print("R G FILES: ",relevant_files)
 
-    if(relevant_files[0]=="-1"):
+    if(relevant_files[0]==-1):
         output = "No Context Needed."
     else:
-        for i in range(len(relevant_files)):
-            content,filename = validate_and_read_file(relevant_files[i])
-            if(content==None):
+        for file_ind in (relevant_files):
+            if(file_ind - 1 <0 or file_ind-1 >= len(FILES_SYMBOL_TABLE) ):
                 continue
-            output+=f"""{i+1}.  Filename: {filename} \nContents:-\n{content}\n"""
+            else:
+                content,filename = validate_and_read_file(FILES_SYMBOL_TABLE[file_ind-1]['path'])
+                if(content==None):
+                    continue
+                output+=f"""{cnt}.  Filename: {filename} \nContents:-\n{content}\n"""
+                cnt+=1
 
     return output
 
@@ -209,15 +212,19 @@ general_runnable = RunnableLambda(GENERAL)
 
 def single_file(inputs):
     single_file_chain = relevant_single_file_prompt | relevant_single_file_model
-    relevant_files = single_file_chain.invoke(inputs)
+    relevant_files = single_file_chain.invoke(inputs).file_index
+    print("R S Files:",relevant_files)
     output = ""
-
-    if(relevant_files == "-1"):
+    FILES_SYMBOL_TABLE = inputs["FILES_DATA"]
+    if(relevant_files == -1):
         output = "No Context Needed."
     else:
-        content,filename = validate_and_read_file(relevant_files)
-        if(content!=None):
-            output+=f"""1.  Filename: {filename} \nContents:-\n{content}\n"""
+        if(relevant_files-1 <0 or relevant_files-1>= len(FILES_SYMBOL_TABLE)):
+            output=""
+        else:
+            content,filename = validate_and_read_file(FILES_SYMBOL_TABLE[relevant_files-1]['path'])
+            if(content!=None):
+                output+=f"""1.  Filename: {filename} \nContents:-\n{content}\n"""
 
     return output
 single_file_runnable = RunnableLambda(single_file)
@@ -236,10 +243,10 @@ branched_chain = RunnableBranch(
 )
 
 
-def LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE):
+def LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE,file_table_str):
     classification_result = classification_chain.invoke({"query":query}).label.value
-    file_table_str = format_file_symbol_table(FILE_SYMBOL_TABLE)
-    INPUTS = {"category":classification_result,"query":query,"CHAT_HISTORY":CHAT_HISTORY,"file_symbol_table":file_table_str}
+    print("Class: ",classification_result)
+    INPUTS = {"category":classification_result,"query":query,"CHAT_HISTORY":CHAT_HISTORY,"file_symbol_table":file_table_str,"FILES_DATA":FILE_SYMBOL_TABLE}
     context = branched_chain.invoke(INPUTS)
     INPUTS["context"]=context
     result = comman_chain_runnable.invoke(INPUTS)
