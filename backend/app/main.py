@@ -8,6 +8,8 @@ from langchain_core.messages import SystemMessage
 from .utils.ingest_repo import ingest_repo
 import stat
 from .utils.chat import SYSTEM_PROMPT,LLM_OUTPUT,format_file_symbol_table
+from fastapi.middleware.cors import CORSMiddleware
+
 
 CHAT_HISTORY=[]
 FILE_SYMBOL_TABLE=[]
@@ -17,6 +19,14 @@ app = FastAPI(
     description="Ask questions about code repos using RAG & Advanced LLM Reasoning.",
     version="1"
 )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def on_rm_error(func, path, exc_info):
     if not os.access(path, os.W_OK):
