@@ -189,7 +189,6 @@ def GENERAL(inputs):
     output = ""
     FILES_SYMBOL_TABLE = inputs["FILES_DATA"]
     cnt=1
-    print("R G FILES: ",relevant_files)
 
     if(relevant_files[0]==-1):
         output = "No Context Needed."
@@ -213,7 +212,6 @@ general_runnable = RunnableLambda(GENERAL)
 def single_file(inputs):
     single_file_chain = relevant_single_file_prompt | relevant_single_file_model
     relevant_files = single_file_chain.invoke(inputs).file_index
-    print("R S Files:",relevant_files)
     output = ""
     FILES_SYMBOL_TABLE = inputs["FILES_DATA"]
     if(relevant_files == -1):
@@ -245,7 +243,6 @@ branched_chain = RunnableBranch(
 
 def LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE,file_table_str):
     classification_result = classification_chain.invoke({"query":query}).label.value
-    print("Class: ",classification_result)
     INPUTS = {"category":classification_result,"query":query,"CHAT_HISTORY":CHAT_HISTORY,"file_symbol_table":file_table_str,"FILES_DATA":FILE_SYMBOL_TABLE}
     context = branched_chain.invoke(INPUTS)
     INPUTS["context"]=context

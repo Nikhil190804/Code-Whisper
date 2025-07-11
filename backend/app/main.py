@@ -41,6 +41,34 @@ def home():
     return JSONResponse(status_code=200,content="API For Chatting With Any Public Github Repo!")
 
 
+@app.get('memory')
+def memory():
+    total, used, free = shutil.disk_usage("/")
+    disk_info = {
+        "total_gb": round(total / (1024 ** 3), 2),
+        "used_gb": round(used / (1024 ** 3), 2),
+        "free_gb": round(free / (1024 ** 3), 2),
+    }
+
+    workspace_dir = os.path.abspath("workspace")
+    files = []
+    for root, dirs, file_list in os.walk(workspace_dir):
+        for file in file_list:
+            file_path = os.path.join(root, file)
+            files.append(file_path)
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "message": "API For Chatting With Any Public Github Repo!",
+            "disk": disk_info,
+            "files_in_workspace": files
+        }
+    )
+
+    
+
+
 @app.post("/init-chat")
 def init(request : UserStartRequest):
     CHAT_HISTORY.clear()
@@ -61,7 +89,6 @@ def init(request : UserStartRequest):
         Repo.clone_from(repo_url, new_repo_path, depth=1)
         FILE_SYMBOL_TABLE=ingest_repo(new_repo_path)
         file_table_str = format_file_symbol_table(FILE_SYMBOL_TABLE)
-        print(file_table_str)
         return {
             "message": "Repository cloned successfully",
             "local_path": new_repo_path
@@ -83,7 +110,6 @@ def start(request : UserChatRequest):
     query = request.query
     try:
         result = LLM_OUTPUT(query,CHAT_HISTORY,FILE_SYMBOL_TABLE,file_table_str)
-        print(result)
         return {
             "message": result,
         }
