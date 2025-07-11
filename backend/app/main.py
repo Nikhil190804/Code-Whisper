@@ -41,7 +41,7 @@ def home():
     return JSONResponse(status_code=200,content="API For Chatting With Any Public Github Repo!")
 
 
-@app.get('memory')
+@app.get('/memory')
 def memory():
     total, used, free = shutil.disk_usage("/")
     disk_info = {
