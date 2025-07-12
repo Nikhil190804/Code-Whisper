@@ -157,14 +157,19 @@ def RAG(inputs):
     code_results = CODE_VECTOR_STORE_RETRIEVER.get_relevant_documents(user_query,k=3)
     non_code_results= NONCODE_VECTOR_STORE_RETRIVER.get_relevant_documents(user_query,k=3)
 
-    for ind,doc in enumerate(code_results,1):
-        output+=f"""{ind}.  File: {doc.metadata['file_path']}\n Content:-\n{doc.page_content}\n"""
+    if(len(code_results)!=0):
+        for ind,doc in enumerate(code_results,1):
+            output+=f"""{ind}.  File: {doc.metadata['file_path']}\n Content:-\n{doc.page_content}\n"""
+    else:
+        output+="No Code Files Are There\n"
 
     output+="\nNON CODE RELATED CONTEXT:-----\n"
-    
-    for ind,doc in enumerate(non_code_results,1):
-        output+=f"""{ind}.  File: {doc.metadata['file_path']}\n Content:-\n{doc.page_content}\n"""
 
+    if(len(non_code_results)!=0):
+        for ind,doc in enumerate(non_code_results,1):
+            output+=f"""{ind}.  File: {doc.metadata['file_path']}\n Content:-\n{doc.page_content}\n"""
+    else:
+        output+="No Non-Code Files Are There\n"
     return output
 rag_runnable = RunnableLambda(RAG)
 

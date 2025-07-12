@@ -70,7 +70,6 @@ def memory():
     return JSONResponse(
         status_code=200,
         content={
-            "message": "API For Chatting With Any Public Github Repo!",
             "disk": disk_info,
             "files_in_workspace": files
         }
@@ -126,7 +125,3 @@ def start(request : UserChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
    
-    
-
-
-
