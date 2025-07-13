@@ -1,4 +1,4 @@
-# 🧠 Repo Chat — Codebase Q&A Server (FastAPI + LangChain)
+# 🧠 Repo Chat - Codebase Q&A 
 
 **Repo Chat** is a backend server built with **FastAPI**, designed to let users interact with any **public GitHub repository** using natural language queries. It uses a combination of **LangChain**, symbol tables, and smart query filtering to answer questions about the structure, logic, and usage of codebases.
 
