@@ -1,0 +1,120 @@
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+}
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+.chat-page.dark {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+.chat-page.light {
+  background-color: #f0f0f0;
+  color: #333333;
+}
+
+.chat-header {
+  padding: 1rem 2rem;
+  background-color: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #8884;
+}
+
+.mode-toggle {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.chat-window {
+  flex-grow: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.user {
+  align-self: flex-end;
+  background-color: #4b9cdb;
+  color: white;
+  border-bottom-right-radius: 0;
+}
+
+.bot {
+  align-self: flex-start;
+  background-color: #eeeeee;
+  color: #111;
+  border-bottom-left-radius: 0;
+}
+
+.chat-page.dark .bot {
+  background-color: #333;
+  color: #fff;
+}
+
+.chat-input {
+  padding: 1rem 2rem;
+  border-top: 1px solid #8884;
+  display: flex;
+  gap: 1rem;
+  background-color: inherit;
+}
+
+.chat-input input {
+  flex-grow: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  background: inherit;
+  color: inherit;
+}
+
+.chat-input input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-input button {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  background-color: #4b9cdb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.chat-input button:hover:not(:disabled) {
+  background-color: #3b8ac4;
+}
+
+.chat-input button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}

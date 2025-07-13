@@ -1,0 +1,96 @@
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(135deg, #1d2b64, #f8cdda);
+  min-height: 100vh;
+}
+
+.homepage-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: #ffffff;
+  text-align: center;
+  padding: 2rem;
+}
+
+.homepage-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.homepage-subtitle {
+  font-size: 1.2rem;
+  font-weight: 300;
+  margin-bottom: 3rem;
+  max-width: 500px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.repo-input {
+  padding: 0.75rem 1rem;
+  width: 320px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  color: #333;
+}
+
+.repo-input:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+}
+
+.analyze-btn {
+  background: #ff416c;
+  background: linear-gradient(to right, #ff4b2b, #ff416c);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.analyze-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.analyze-btn:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  z-index: 1000;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
