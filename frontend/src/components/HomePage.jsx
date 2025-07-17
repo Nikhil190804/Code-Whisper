@@ -43,7 +43,8 @@ function HomePage() {
 
   return (
     <div className="homepage-container">
-      <h1 className="homepage-title">RepoWhisper</h1>
+      <img src="../logo2.png" alt="logo" style={{width:"20%"}} />
+      <h1 className="homepage-title">Code-Whisper</h1>
       <p className="homepage-subtitle">Chat with any public GitHub repository in seconds.</p>
       <div className="form-container">
         <input
