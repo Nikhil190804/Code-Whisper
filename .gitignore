@@ -2,7 +2,6 @@ backend/venv/
 *__pycache__/
 backend/workspace/*
 chroma_code_db/*
-*.env
 chroma_noncode_db/*
 
 # Logs
