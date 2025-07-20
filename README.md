@@ -1,123 +1,42 @@
-# 🧠 Repo Chat - Codebase Q&A 
+# CodeWhisper 🧠💬
 
-**Repo Chat** is a backend server built with **FastAPI**, designed to let users interact with any **public GitHub repository** using natural language queries. It uses a combination of **LangChain**, symbol tables, and smart query filtering to answer questions about the structure, logic, and usage of codebases.
+**CodeWhisper** is a conversational AI tool that allows you to interact with GitHub repositories using natural language. It's designed to help you explore and understand large codebases faster by providing a clean, modern chat interface to ask questions about the code.
 
 ---
-
-
 ## ⚠️ Important Note
 
 Due to free-tier hosting and limited server resources, **only repositories under ~30 MB in size** are currently supported.  
 
 ---
-## 🚀 Features
 
-- Clone and analyze any public GitHub repository.
-- Ask natural-language questions about code structure, functions, files, or setup.
-- Uses RAG (Retrieval-Augmented Generation) selectively, only when relevant.
-- Intelligent **query categorization** and **dynamic context feeding**.
-- In-memory chat history and symbol table for each session.
-- API-first design using **FastAPI**, easily integratable with a frontend (e.g. React).
-- Deployed and tested on **Render.com**.
+## ✨ Overview
 
----
+Have you ever felt lost in a new or complex GitHub repository? CodeWhisper is here to help. Instead of spending hours manually searching through files and folders, you can simply ask questions in plain English. CodeWhisper leverages the power of Large Language Models (LLMs) to understand your queries and provide context-aware answers, making codebase exploration more intuitive and efficient.
 
-## 🛠️ Tech Stack
-
-- **Python 3.10+**
-- **FastAPI** – REST API framework
-- **LangChain** – for LLM reasoning and document retrieval
-- **GitPython** – clone and manage GitHub repos
-- **Pydantic** – request validation
-- **shutil / os / stat** – workspace and file management
-- **CORS middleware** – for cross-origin frontend integration
+Why CodeWhisper is useful:
+- **Explore large codebases faster:** Get to the information you need without getting lost in the file tree.
+- **Understand complex logic:** Ask for explanations of specific functions, classes, or files.
+- **Onboard new developers quickly:** Help new team members get up to speed with a new codebase.
 
 ---
 
-## 📦 API Endpoints
+## 🧰 Tech Stack
 
-### `GET /`
+CodeWhisper is built with a modern, powerful tech stack:
 
-Returns a welcome message confirming the API is live.
-
-**Response:**
-
-```json
-"API For Chatting With Any Public Github Repo!"
-```
+-   **Frontend:** React.js
+-   **Backend:** FastAPI server using LangChain for LLM-related tasks
+-   **LLM:** GPT-4.1 nano
+-   **RAG System:** Dynamic Retrieval-Augmented Generation
 
 ---
 
-### `POST /init-chat`
+## 🔍 Key Features
 
-Clones the repo and initializes the chat session.
-
-**Request Payload:**
-
-```json
-{
-  "repo_url": "https://github.com/owner/repo"
-}
-```
-
-**Success Response:**
-
-```json
-{
-  "message": "Repository cloned successfully",
-  "local_path": "/absolute/path/to/local/clone"
-}
-```
-
-**Possible Errors:**
-
-- `404` – Repository not found or private
-- `401` – Authentication failed
-- `400` – Other Git errors
-
----
-
-### `POST /start-chat`
-
-Ask questions about the initialized repo.
-
-**Request Payload:**
-
-```json
-{
-  "query": "Where is the training code in this repo?"
-}
-```
-
-**Success Response:**
-
-```json
-{
-  "message": "The training logic is implemented in train.py under the /models directory..."
-}
-```
-
----
-
-### `GET /memory`
-
-Returns available disk space and lists current workspace files.
-
-**Success Response:**
-
-```json
-{
-  "disk": {
-    "total_gb": 500,
-    "used_gb": 123,
-    "free_gb": 377
-  },
-  "files_in_workspace": [
-    "workspace/repo1/file.py",
-    "workspace/repo2/utils/helper.py"
-  ]
-}
-```
+-   **🧠 Intelligent Query Understanding:** CodeWhisper understands natural language queries and can interpret your intent to find the most relevant information.
+-   **📂 Context-Aware Response Generation:** The dynamic RAG system provides context from the repository to the LLM, resulting in more accurate and relevant answers.
+-   **⚡ Fast Repo Exploration:** Quickly navigate and understand repositories of any size.
+-   **💬 Clean, Modern Chat UI:** A user-friendly interface that makes interacting with your codebase a breeze.
 
 ---
 
@@ -134,25 +53,58 @@ Returns available disk space and lists current workspace files.
 
 ---
 
-## 🧪 Deployment
+## 🚀 How to Use
 
-This backend is currently deployed on **Render.com**, and is compatible with any frontend (such as a React chat interface).
+*(Instructions for local deployment are coming soon!)*
 
 ---
 
-## 📁 Project Structure
+## ⚙️ Architecture
 
-```
-.
-├── main.py                  # FastAPI app with endpoints
-├── schema/                  # Pydantic models
-├── utils/
-│   ├── ingest_repo.py       # Repo parsing + embedding
-│   ├── chat.py              # Chat logic + LLM pipeline
-├── workspace/               # Temporary repo storage
-```
+CodeWhisper's architecture is designed for modularity and scalability. Here's a brief overview of the components:
+
+-   **Frontend:** A React.js application that provides the user interface for the chat.
+-   **Backend:** A FastAPI server that handles the core logic. It receives user queries, interacts with the LLM via LangChain, and manages the RAG system.
+-   **LLM (Large Language Model):** We use GPT-4.1 nano for its powerful natural language understanding and generation capabilities.
+-   **Vector Store:** A vector database (like ChromaDB) is used to store embeddings of the codebase for efficient retrieval.
+-   **Dynamic RAG System:** This system dynamically retrieves relevant context from the vector store based on the user's query and injects it into the prompt for the LLM.
+
+---
+
+## 📸 Screenshots
+
+*(Placeholder for a GIF or screenshot of the CodeWhisper chat interface)*
+
+---
+
+## 📦 Dependencies
+
+-   **LangChain:** For building the core LLM-powered application.
+-   **ChromaDB (or other vector DB):** For creating and managing the vector store.
+-   **OpenAI API (or similar):** For accessing the LLM.
+-   **React.js:** For the frontend user interface.
+-   **FastAPI:** For the backend server.
+-   **GitPython:** For cloning and managing GitHub repositories.
+
+---
+
+## 🤖 Example Queries
+
+Here are a few examples of questions you can ask CodeWhisper:
+
+-   "What does `train.py` do?"
+-   "Show me all functions that use the `load_model()` function."
+-   "Where is the database configuration defined?"
+-   "Explain the `CustomDataset` class in `data_loader.py`."
+
+---
+
+## 🌐 Deployed Project
+
+You can find the live version of CodeWhisper here:
+[**Link to Deployed Project**](https://your-deployment-link.com) (coming soon!)
 
 ---
 
 ## ✍️ Author
-**Nikhil Kumar** 
+**Nikhil Kumar**
