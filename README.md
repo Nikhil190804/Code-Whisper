@@ -53,9 +53,48 @@ CodeWhisper is built with a modern, powerful tech stack:
 
 ---
 
-## 🚀 How to Use
+## 🚀 How to Run Locally
+### 📦 1. Clone the Repo
 
-*(Instructions for local deployment are coming soon!)*
+```bash
+git clone https://github.com/your-username/code-whisper.git
+cd code-whisper
+```
+
+---
+
+### 🖥️ 2. Backend Setup
+
+```bash
+cd backend
+python3.10 -m venv venv
+source venv/bin/activate      # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Create `.env` in root (`code-whisper/.env`) with:
+```env
+OPENAI_API_KEY=your_api_key_here
+```
+
+Run the FastAPI server:
+```bash
+uvicorn app.main:app --reload
+```
+
+> Runs at: `http://127.0.0.1:8000`
+
+---
+
+### 🌐 3. Frontend Setup
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+
+> Runs at: `http://localhost:3000`
 
 ---
 
