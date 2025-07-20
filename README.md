@@ -61,8 +61,6 @@ git clone https://github.com/your-username/code-whisper.git
 cd code-whisper
 ```
 
----
-
 ### 🖥️ 2. Backend Setup
 
 ```bash
@@ -84,8 +82,6 @@ uvicorn app.main:app --reload
 
 > Runs at: `http://127.0.0.1:8000`
 
----
-
 ### 🌐 3. Frontend Setup
 
 ```bash
@@ -95,8 +91,6 @@ npm run dev
 ```
 
 > Runs at: `http://localhost:3000`
-
----
 
 ## ⚙️ Architecture
 
