@@ -9,6 +9,14 @@ Due to free-tier hosting and limited server resources, **only repositories under
 
 ---
 
+
+## 🌐 Deployed Project
+
+You can find the live version of CodeWhisper here:
+[**Link to Deployed Project**](https://code-whisper-gilt.vercel.app/) 
+
+---
+ 
 ## ✨ Overview
 
 Have you ever felt lost in a new or complex GitHub repository? CodeWhisper is here to help. Instead of spending hours manually searching through files and folders, you can simply ask questions in plain English. CodeWhisper leverages the power of Large Language Models (LLMs) to understand your queries and provide context-aware answers, making codebase exploration more intuitive and efficient.
@@ -53,11 +61,44 @@ CodeWhisper is built with a modern, powerful tech stack:
 
 ---
 
-## 🚀 How to Use
+## 🚀 How to Run Locally
+### 📦 1. Clone the Repo
 
-*(Instructions for local deployment are coming soon!)*
+```bash
+git clone https://github.com/your-username/code-whisper.git
+cd code-whisper
+```
 
----
+### 🖥️ 2. Backend Setup
+
+```bash
+cd backend
+python3.10 -m venv venv
+source venv/bin/activate      # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Create `.env` in root (`code-whisper/.env`) with:
+```env
+OPENAI_API_KEY=your_api_key_here
+```
+
+Run the FastAPI server:
+```bash
+uvicorn app.main:app --reload
+```
+
+> Runs at: `http://127.0.0.1:8000`
+
+### 🌐 3. Frontend Setup
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+
+> Runs at: `http://localhost:3000`
 
 ## ⚙️ Architecture
 
@@ -97,14 +138,4 @@ Here are a few examples of questions you can ask CodeWhisper:
 -   "Where is the database configuration defined?"
 -   "Explain the `CustomDataset` class in `data_loader.py`."
 
----
 
-## 🌐 Deployed Project
-
-You can find the live version of CodeWhisper here:
-[**Link to Deployed Project**](https://your-deployment-link.com) (coming soon!)
-
----
-
-## ✍️ Author
-**Nikhil Kumar**
