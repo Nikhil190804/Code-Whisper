@@ -61,7 +61,7 @@ function ChatPage() {
   return (
     <div className={`chat-page ${darkMode ? "dark" : "light"}`}>
       <div className="chat-header">
-        <h2>RepoChat Assistant</h2>
+        <h2>Code-Whisper Assistant</h2>
         <button className="mode-toggle" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
         </button>
