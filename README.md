@@ -9,6 +9,14 @@ Due to free-tier hosting and limited server resources, **only repositories under
 
 ---
 
+
+## 🌐 Deployed Project
+
+You can find the live version of CodeWhisper here:
+[**Link to Deployed Project**](https://code-whisper-gilt.vercel.app/) 
+
+---
+ 
 ## ✨ Overview
 
 Have you ever felt lost in a new or complex GitHub repository? CodeWhisper is here to help. Instead of spending hours manually searching through files and folders, you can simply ask questions in plain English. CodeWhisper leverages the power of Large Language Models (LLMs) to understand your queries and provide context-aware answers, making codebase exploration more intuitive and efficient.
@@ -130,14 +138,4 @@ Here are a few examples of questions you can ask CodeWhisper:
 -   "Where is the database configuration defined?"
 -   "Explain the `CustomDataset` class in `data_loader.py`."
 
----
 
-## 🌐 Deployed Project
-
-You can find the live version of CodeWhisper here:
-[**Link to Deployed Project**](https://your-deployment-link.com) (coming soon!)
-
----
-
-## ✍️ Author
-**Nikhil Kumar**
