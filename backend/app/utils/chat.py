@@ -9,7 +9,7 @@ import os
 api_key = os.getenv("OPENAI_API_KEY_2")
 base_url = os.getenv("OPENAI_BASE_URL_2")
 
-CHAT_MODEL = ChatOpenAI(model="openai/gpt-oss-20b:free", api_key=api_key,
+CHAT_MODEL = ChatOpenAI(model="openai/gpt-5.5", api_key=api_key,
     base_url=base_url)
 SYSTEM_PROMPT ="""
 You are an expert AI assistant specialized in answering questions about a GitHub code repository.
@@ -32,7 +32,7 @@ Be precise, technical, and helpful in your answers.
 """
 
 
-classification_model = ChatOpenAI(model="openai/gpt-oss-20b:free", api_key=api_key,
+classification_model = ChatOpenAI(model="openai/gpt-5.5", api_key=api_key,
     base_url=base_url).with_structured_output(ClassificationOutput)
 classification_prompt = PromptTemplate.from_template("""
 You are a classifier that analyzes software engineering user questions about a github code repository.
