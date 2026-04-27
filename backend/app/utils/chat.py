@@ -4,6 +4,7 @@ from langchain_core.prompts import PromptTemplate
 from app.utils.ingest_repo import NONCODE_VECTOR_STORE_RETRIVER,CODE_VECTOR_STORE_RETRIEVER,validate_and_read_file
 from langchain_core.runnables import RunnableLambda,RunnableBranch
 from langchain_core.messages import HumanMessage, AIMessage
+import os
 
 api_key = os.getenv("OPENAI_API_KEY_2")
 base_url = os.getenv("OPENAI_BASE_URL_2")
