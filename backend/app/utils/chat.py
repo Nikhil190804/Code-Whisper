@@ -5,8 +5,11 @@ from app.utils.ingest_repo import NONCODE_VECTOR_STORE_RETRIVER,CODE_VECTOR_STOR
 from langchain_core.runnables import RunnableLambda,RunnableBranch
 from langchain_core.messages import HumanMessage, AIMessage
 
+api_key = os.getenv("OPENAI_API_KEY_2")
+base_url = os.getenv("OPENAI_BASE_URL_2")
 
-CHAT_MODEL = ChatOpenAI(model="provider-3/gpt-4.1-nano")
+CHAT_MODEL = ChatOpenAI(model="openai/gpt-oss-20b:free", api_key=api_key,
+    base_url=base_url)
 SYSTEM_PROMPT ="""
 You are an expert AI assistant specialized in answering questions about a GitHub code repository.
 Your tasks include:
@@ -28,7 +31,8 @@ Be precise, technical, and helpful in your answers.
 """
 
 
-classification_model = ChatOpenAI(model="provider-3/gpt-4.1-nano").with_structured_output(ClassificationOutput)
+classification_model = ChatOpenAI(model="openai/gpt-oss-20b:free", api_key=api_key,
+    base_url=base_url).with_structured_output(ClassificationOutput)
 classification_prompt = PromptTemplate.from_template("""
 You are a classifier that analyzes software engineering user questions about a github code repository.
 Classify each question into exactly one of these categories: GENERAL, FILE, FUNCTION&CLASS, FOLLOWUP.
