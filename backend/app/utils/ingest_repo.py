@@ -18,8 +18,8 @@ from charset_normalizer import from_path
 
 load_dotenv()
 #CODE_EMBEDDING_MODEL = VoyageEmbeddings(model="voyage-code-3")
-CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-small")
-NON_CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="provider-3/text-embedding-3-small")
+CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="openai/text-embedding-3-small")
+NON_CODE_EMBEDDING_MODEL = OpenAIEmbeddings(model="openai/text-embedding-3-small")
 EXT_TO_LANGUAGE = {
     ".py": Language.PYTHON,
     ".js": Language.JS,
